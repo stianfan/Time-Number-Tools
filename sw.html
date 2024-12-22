@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stop Watch</title>
+        <style>:root
+        {
+            --fg: #ebdbb2;
+            --ac: #4CAF50;
+            --bg: #181818;
+            --bg2: #282828;
+
+            --green: #4CAF50;
+            --yellow: #e4b545;
+            --red: #cc241d;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .timer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            font-size: 84px;
+            position: relative;
+        }
+
+        .digit-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .digit {
+            background-color: var(--bg2);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .separator {
+            margin: 0 5px;
+            line-height: 120px;
+        }
+
+        .controls {
+            display: inline-flex;
+            flex: auto;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: var(--bg);
+            border: none;
+            color: var(--bg2);
+            border-radius: 5px;
+        }
+
+        button:hover {
+            color: var(--ac);
+        }
+
+        button:focus {
+            outline: 2px solid var(--ac);
+            outline-offset: 2px;
+        }
+
+        .hours-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            color: var(--bg2);
+            background: var(--bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .back-button svg {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+        }
+
+        .back-button:hover {
+            background-color: var(--bg);
+            color: var(--fg);
+            transform: scale(1.1);
+        }
+
+        .back-button:active {
+            background-color: var(--bg);
+            color: var(--ac);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" width="24" height="24" onclick="window.history.back()">
+        <svg
+            xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+            <!-- Roof -->
+            <path
+            d="M12 2L2 12h3v10h14V12h3L12 2z" fill="currentColor"/>
+            <!-- Door -->
+            <path d="M10 14h4v8h-4v-8z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="container" id="timerContainer">
+        <div class="timer">
+            <div class="hours-section">
+                <div class="digit-container" data-type="hours">
+                    <div class="digit">0</div>
+                </div>
+                <span class="separator">:</span>
+            </div>
+            <div class="digit-container" data-type="minutes1">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container" data-type="minutes2">
+                <div class="digit">0</div>
+            </div>
+            <span class="separator">:</span>
+            <div class="digit-container" data-type="seconds1">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container" data-type="seconds2">
+                <div class="digit">0</div>
+            </div>
+            <span class="separator">.</span>
+            <div class="digit-container" data-type="tenths">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container" data-type="hundredths">
+                <div class="digit">0</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="startButton">Start</button><br>
+            <button id="resetButton" onclick="location.reload()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let startTime;
+        let elapsed = 0;
+        let isRunning = false;
+        let intervalId = null;
+
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const hoursSection = document.querySelector('.hours-section');
+        const digitContainers = {
+            hours: document.querySelector('[data-type="hours"] .digit'),
+            minutes1: document.querySelector('[data-type="minutes1"] .digit'),
+            minutes2: document.querySelector('[data-type="minutes2"] .digit'),
+            seconds1: document.querySelector('[data-type="seconds1"] .digit'),
+            seconds2: document.querySelector('[data-type="seconds2"] .digit'),
+            tenths: document.querySelector('[data-type="tenths"] .digit'),
+            hundredths: document.querySelector('[data-type="hundredths"] .digit')
+        };
+
+        const separators = document.querySelectorAll('.separator');
+
+        hoursSection.style.display = 'none';
+        digitContainers.minutes1.parentElement.style.display = 'none';
+        digitContainers.minutes2.parentElement.style.display = 'none';
+        digitContainers.seconds1.parentElement.style.display = 'none';
+        digitContainers.seconds2.parentElement.style.display = 'none';
+        separators[1].style.display = 'none';
+        separators[2].style.display = 'none';
+
+        startButton.addEventListener('click', toggleTimer);
+        resetButton.style.display = 'none';
+
+        function toggleTimer() {
+            if (! isRunning) {
+                startTime = Date.now() - elapsed;
+                intervalId = setInterval(updateDisplay, 10);
+                startButton.textContent = 'Pause';
+                resetButton.style.display = 'none';
+                isRunning = true;
+            } else {
+                clearInterval(intervalId);
+                elapsed = Date.now() - startTime;
+                startButton.textContent = 'Start';
+                resetButton.style.display = 'inline-block';
+                isRunning = false;
+            }
+        }
+
+        function updateDisplay() {
+            const currentTime = Date.now();
+            elapsed = currentTime - startTime;
+
+            const totalMilliseconds = elapsed;
+            const totalSeconds = Math.floor(elapsed / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const milliseconds = Math.floor((elapsed % 1000) / 10);
+            const tenths = Math.floor(milliseconds / 10);
+            const hundredths = milliseconds % 10;
+
+            if (totalSeconds >= 3600) {
+                hoursSection.style.display = 'flex';
+            }
+
+            if (totalSeconds >= 60) {
+                digitContainers.minutes1.parentElement.style.display = 'flex';
+                digitContainers.minutes2.parentElement.style.display = 'flex';
+                separators[1].style.display = 'inline';
+            }
+
+            if (totalSeconds >= 1) {
+                digitContainers.seconds1.parentElement.style.display = 'flex';
+                digitContainers.seconds2.parentElement.style.display = 'flex';
+                separators[2].style.display = 'inline';
+            }
+
+            if (hours > 0) {
+                digitContainers.hours.textContent = hours;
+            }
+
+            if (minutes > 0 || hours > 0) {
+                digitContainers.minutes1.textContent = Math.floor(minutes / 10);
+                digitContainers.minutes2.textContent = minutes % 10;
+            }
+
+            digitContainers.seconds1.textContent = Math.floor(seconds / 10);
+            digitContainers.seconds2.textContent = seconds % 10;
+            digitContainers.tenths.textContent = tenths;
+            digitContainers.hundredths.textContent = hundredths;
+        }
+    </script>
+
+</body></html>

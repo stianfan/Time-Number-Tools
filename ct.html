@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Countdown Timer</title>
+        <style>:root
+        {
+            --fg: #ebdbb2;
+            --ac: #4CAF50;
+            --bg: #181818;
+            --bg2: #282828;
+
+            --green: #4CAF50;
+            --yellow: #e4b545;
+            --red: #cc241d;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .timer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            font-size: 84px;
+            position: relative;
+        }
+
+        .times-up {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 120px;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        }
+
+        .times-up.visible {
+            display: flex;
+            cursor: pointer;
+        }
+
+        .digit-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .digit {
+            background-color: var(--bg2);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .arrow {
+            cursor: pointer;
+            font-size: 24px;
+            padding: 5px;
+            user-select: none;
+        }
+
+        .arrow:hover {
+            color: var(--ac);
+        }
+
+        .separator {
+            margin: 0 5px;
+            line-height: 120px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: var(--bg);
+            border: none;
+            color: var(--bg2);
+            border-radius: 5px;
+        }
+
+        button:hover {
+            color: var(--ac);
+        }
+
+        button:focus {
+            outline: 2px solid var(--ac);
+            outline-offset: 2px;
+        }
+
+        #startButton {
+            color: var(--fg);
+        }
+
+        #startButton:hover {
+            color: var(--ac);
+        }
+
+        .running .arrow,
+        .running #addHours {
+            display: none;
+        }
+
+        .running #resetButton {
+            display: none;
+        }
+
+        .running.paused #resetButton {
+            display: inline-block;
+        }
+
+
+        #addHours {
+            margin: 0 5px;
+            padding: 5px 10px;
+            font-size: 24px;
+            line-height: 120px;
+            height: 120px;
+        }
+
+        .hours-section {
+            display: none;
+        }
+
+        .hours-section.visible {
+            display: flex;
+            align-items: center;
+        }
+        .progress-container {
+            direction: rtl;
+            width: 100%;
+            height: 10px;
+            background-color: var(--ac);
+            margin: 20px 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg2);
+            transition: width 0.9s linear;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            color: var(--bg2);
+            background: var(--bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .back-button svg {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+        }
+
+        .back-button:hover {
+            background-color: var(--bg);
+            color: var(--fg);
+            transform: scale(1.1);
+        }
+
+        .back-button:active {
+            background-color: var(--bg);
+            color: var(--ac);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" width="24" height="24" onclick="window.history.back()">
+        <svg
+            xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+            <!-- Roof -->
+            <path
+            d="M12 2L2 12h3v10h14V12h3L12 2z" fill="currentColor"/>
+            <!-- Door -->
+            <path d="M10 14h4v8h-4v-8z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="times-up" onclick="location.reload()">Time's up!<div class="controls"></div>
+    </div>
+    <div class="container" id="timerContainer">
+        <div class="timer">
+            <button id="addHours">+</button>
+            <div class="hours-section">
+                <div class="digit-container" data-type="hours">
+                    <div class="arrow up">▲</div>
+                    <div class="digit">0</div>
+                    <div class="arrow down">▼</div>
+                </div>
+                <span class="separator">:</span>
+            </div>
+            <div class="digit-container" data-type="minutes1">
+                <div class="arrow up">▲</div>
+                <div class="digit">0</div>
+                <div class="arrow down">▼</div>
+            </div>
+            <div class="digit-container" data-type="minutes2">
+                <div class="arrow up">▲</div>
+                <div class="digit">0</div>
+                <div class="arrow down">▼</div>
+            </div>
+            <span class="separator">:</span>
+            <div class="digit-container" data-type="seconds1">
+                <div class="arrow up">▲</div>
+                <div class="digit">0</div>
+                <div class="arrow down">▼</div>
+            </div>
+            <div class="digit-container" data-type="seconds2">
+                <div class="arrow up">▲</div>
+                <div class="digit">0</div>
+                <div class="arrow down">▼</div>
+            </div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="controls">
+            <button id="startButton">Start</button>
+            <button id="resetButton" onclick="location.reload()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('timerContainer');
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const addHoursButton = document.getElementById('addHours');
+        const hoursSection = document.querySelector('.hours-section');
+        let countdownInterval;
+        let isRunning = false;
+        let initialTime = 0;
+
+        function updateDigit(type, increment) {
+            const digitContainer = document.querySelector(`[data-type="${type}"]`);
+            const digitElement = digitContainer.querySelector('.digit');
+            let value = parseInt(digitElement.textContent);
+
+            if (increment) {
+                value = (value + 1) % (type.includes('seconds') || type.includes('minutes') ? 10 : 1000);
+            } else {
+                value = value - 1 < 0 ? (type.includes('seconds') || type.includes('minutes') ? 9 : 0) : value - 1;
+            } digitElement.textContent = value;
+
+            if (type === 'hours') {
+                const width = Math.max(40, value.toString().length * 40);
+                digitElement.style.minWidth = `${width}px`;
+            }
+        }
+
+        function getTimeInSeconds() {
+            const hours = hoursSection.classList.contains('visible') ? parseInt(document.querySelector('[data-type="hours"] .digit').textContent) : 0;
+            const minutes1 = parseInt(document.querySelector('[data-type="minutes1"] .digit').textContent);
+            const minutes2 = parseInt(document.querySelector('[data-type="minutes2"] .digit').textContent);
+            const seconds1 = parseInt(document.querySelector('[data-type="seconds1"] .digit').textContent);
+            const seconds2 = parseInt(document.querySelector('[data-type="seconds2"] .digit').textContent);
+
+            return(hours * 3600) + ((minutes1 * 10 + minutes2) * 60) + (seconds1 * 10 + seconds2);
+        }
+
+        function updateDisplay(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = seconds % 60;
+
+            if (hoursSection.classList.contains('visible')) {
+                const hoursDigit = document.querySelector('[data-type="hours"] .digit');
+                hoursDigit.textContent = hours;
+                const width = Math.max(40, hours.toString().length * 40);
+                hoursDigit.style.minWidth = `${width}px`;
+            }
+            document.querySelector('[data-type="minutes1"] .digit').textContent = Math.floor(minutes / 10);
+            document.querySelector('[data-type="minutes2"] .digit').textContent = minutes % 10;
+            document.querySelector('[data-type="seconds1"] .digit').textContent = Math.floor(remainingSeconds / 10);
+            document.querySelector('[data-type="seconds2"] .digit').textContent = remainingSeconds % 10;
+
+            if (isRunning) {
+                const progressPercent = (seconds / initialTime) * 100;
+                document.querySelector('.progress-bar').style.width = `${progressPercent}%`;
+            }
+        }
+
+        function startTimer() {
+            if (isRunning) 
+                return;
+            
+
+
+            let timeLeft = getTimeInSeconds();
+            if (timeLeft === 0) 
+                return;
+            
+
+
+            if (! container.classList.contains('running')) {
+                initialTime = timeLeft;
+            }
+
+
+            isRunning = true;
+            container.classList.add('running');
+            container.classList.remove('paused');
+            startButton.textContent = 'Pause';
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                updateDisplay(timeLeft);
+
+                if (timeLeft === 0) {
+                    clearInterval(countdownInterval);
+                    isRunning = false;
+                    startButton.textContent = 'Start';
+                    setTimeout(() => {
+                        const audio = new Audio('bell.mp3');
+                        audio.play();
+                        document.querySelector('.times-up').classList.add('visible');
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(countdownInterval);
+            isRunning = false;
+            startButton.textContent = 'Start';
+            container.classList.add('paused');
+        }
+
+        function resetTimer() {
+            location.reload(true);
+        }
+
+        document.querySelectorAll('.arrow').forEach(arrow => {
+            arrow.addEventListener('click', () => {
+                const type = arrow.parentElement.dataset.type;
+                updateDigit(type, arrow.classList.contains('up'));
+            });
+        });
+
+        startButton.addEventListener('click', () => {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        });
+
+        resetButton.addEventListener('click', resetTimer);
+
+        addHoursButton.addEventListener('click', () => {
+            hoursSection.classList.toggle('visible');
+            addHoursButton.textContent = hoursSection.classList.contains('visible') ? '-' : '+';
+        });
+    </script>
+</body></html>

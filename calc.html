@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Basic Calculator</title>
+        <style>:root
+        {
+            --fg: #ebdbb2;
+            --ac: #4CAF50;
+            --bg: #181818;
+            --bg2: #282828;
+
+            --green: #4CAF50;
+            --yellow: #e4b545;
+            --red: #cc241d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg);
+        }
+
+        .calculator {
+            background-color: var(--bg2);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 300px;
+        }
+
+        .display {
+            background-color: var(--bg);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: right;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .display input {
+            width: 100%;
+            border: none;
+            background: none;
+            color: var(--fg);
+            text-align: right;
+            outline: none;
+        }
+
+        #expression {
+            font-size: 1.2em;
+            opacity: 0.8;
+            color: var(--fg);
+            min-height: 1.2em;
+        }
+
+        #display {
+            font-size: 2em;
+        }
+
+        .clear-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .clear-icon:hover {
+            opacity: 1;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            filter: brightness(120%);
+        }
+
+        .number {
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        .operator {
+            background-color: var(--yellow);
+            color: var(--bg);
+        }
+
+        .equals {
+            background-color: var(--green);
+            color: var(--fg);
+            grid-row: span 2;
+        }
+
+        .clear {
+            background-color: var(--red);
+            color: var(--fg);
+        }
+
+        .clear-icon {
+            display: none;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            color: var(--bg2);
+            background: var(--bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .back-button svg {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+        }
+
+        .back-button:hover {
+            background-color: var(--bg);
+            color: var(--fg);
+            transform: scale(1.1);
+        }
+
+        .back-button:active {
+            background-color: var(--bg);
+            color: var(--ac);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" width="24" height="24" onclick="window.history.back()">
+        <svg
+            xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+            <!-- Roof -->
+            <path
+            d="M12 2L2 12h3v10h14V12h3L12 2z" fill="currentColor"/>
+            <!-- Door -->
+            <path d="M10 14h4v8h-4v-8z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="calculator">
+        <div class="display">
+            <svg class="clear-icon" width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="#fff">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+            </svg>
+            <input type="text" id="expression" readonly>
+            <input type="text" id="display" readonly value="0">
+        </div>
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">C</button>
+            <button class="operator" onclick="appendOperator('/')">/</button>
+            <button class="operator" onclick="appendOperator('*')">×</button>
+            <button class="operator" onclick="deleteLast()">
+                <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+                    <line x1="18" y1="9" x2="12" y2="15"/>
+                    <line x1="12" y1="9" x2="18" y2="15"/>
+                </svg>
+            </button>
+            <button class="number" onclick="appendNumber('7')">7</button>
+            <button class="number" onclick="appendNumber('8')">8</button>
+            <button class="number" onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('-')">-</button>
+            <button class="number" onclick="appendNumber('4')">4</button>
+            <button class="number" onclick="appendNumber('5')">5</button>
+            <button class="number" onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+            <button class="number" onclick="appendNumber('1')">1</button>
+            <button class="number" onclick="appendNumber('2')">2</button>
+            <button class="number" onclick="appendNumber('3')">3</button>
+            <button class="equals" onclick="calculate()">=</button>
+            <button class="number" onclick="appendNumber('0')">0</button>
+            <button class="number" onclick="appendNumber('.')">.</button>
+            <button class="number" onclick="toggleSign()">+/-</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const expression = document.getElementById('expression');
+        let currentValue = '0';
+        let hasDecimal = false;
+        let lastWasOperator = false;
+
+        function updateDisplay() {
+            display.value = currentValue;
+        }
+
+        function appendNumber(num) {
+            if (num === '.' && hasDecimal) 
+                return;
+            
+
+
+            if (num === '.' && ! hasDecimal) 
+                hasDecimal = true;
+            
+
+
+            if (currentValue === '0' && num !== '.') {
+                currentValue = num;
+            } else {
+                currentValue += num;
+            } lastWasOperator = false;
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (lastWasOperator) {
+                currentValue = currentValue.slice(0, -1) + op;
+            } else {
+                currentValue += op;
+            } hasDecimal = false;
+            lastWasOperator = true;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentValue = '0';
+            hasDecimal = false;
+            lastWasOperator = false;
+            expression.value = '';
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            if (currentValue.length === 1) {
+                currentValue = '0';
+            } else {
+                if (currentValue[currentValue.length - 1] === '.') 
+                    hasDecimal = false;
+                
+
+
+                currentValue = currentValue.slice(0, -1);
+            } lastWasOperator = false;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentValue === '0') 
+                return;
+            
+
+
+            if (currentValue[0] === '-') {
+                currentValue = currentValue.slice(1);
+            } else {
+                currentValue = '-' + currentValue;
+            } updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                expression.value = currentValue + ' =';
+                currentValue = Number(eval(currentValue).toFixed(8));
+                currentValue = currentValue.toString();
+
+                if (currentValue.includes('.')) {
+                    currentValue = Number(currentValue).toString();
+                }
+
+                hasDecimal = currentValue.includes('.');
+                lastWasOperator = false;
+                updateDisplay();
+            } catch (error) {
+                currentValue = 'Error';
+                updateDisplay();
+                setTimeout(() => {
+                    clearDisplay();
+                    expression.value = '';
+                }, 1000);
+            }
+        }
+
+        // Add keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (/[0-9.]/.test(key)) {
+                appendNumber(key);
+            } else if (['+', '-', '*', '/'].includes(key)) {
+                appendOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                calculate();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            } else if (key === 'Escape') {
+                clearDisplay();
+            }
+        });
+
+        // Clear icon click handler
+        document.querySelector('.clear-icon').addEventListener('click', clearDisplay);
+    </script>
+</body></html>

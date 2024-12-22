@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Counter</title>
+        <style>:root
+        {
+            --fg: #ebdbb2;
+            --ac: #4CAF50;
+            --bg: #181818;
+            --bg2: #282828;
+
+            --green: #4CAF50;
+            --yellow: #e4b545;
+            --red: #cc241d;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .counter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            font-size: 84px;
+            position: relative;
+        }
+
+        .digit-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .digit {
+            background-color: var(--bg2);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .minus-sign {
+            background-color: var(--bg2);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: var(--bg2);
+            border: none;
+            color: var(--ac);
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: var(--ac);
+            color: var(--bg);
+        }
+
+        button:focus {
+            outline: 3px solid var(--ac);
+            outline-offset: 2px;
+        }
+
+        #resetButton {
+            background-color: var(--bg);
+            color: var(--bg2);
+        }
+
+        #resetButton:hover {
+            background-color: var(--bg2);
+            color: var(--ac);
+        }
+
+        #subButton {
+            background-color: var(--bg);
+            color: var(--fg);
+        }
+
+        #subButton:hover {
+            background-color: var(--bg2);
+            color: var(--ac);
+        }
+
+        #addButton {
+            width: 100%;
+        }
+        .minus-sign {
+            background: var(--bg);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            color: var(--bg2);
+            background: var(--bg);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .back-button svg {
+            width: 24px !important;
+            height: 24px !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+        }
+
+        .back-button:hover {
+            background-color: var(--bg);
+            color: var(--fg);
+            transform: scale(1.1);
+        }
+
+        .back-button:active {
+            background-color: var(--bg);
+            color: var(--ac);
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" width="24" height="24" onclick="window.history.back()">
+        <svg
+            xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+            <!-- Roof -->
+            <path
+            d="M12 2L2 12h3v10h14V12h3L12 2z" fill="currentColor"/>
+            <!-- Door -->
+            <path d="M10 14h4v8h-4v-8z" fill="currentColor"/>
+        </svg>
+    </button>
+    <div class="container" id="counterContainer">
+        <div class="counter">
+            <div class="digit-container hidden" id="minusSign">
+                <div class="minus-sign">-</div>
+            </div>
+            <div class="digit-container hidden" data-type="7th-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container hidden" data-type="6th-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container hidden" data-type="5th-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container hidden" data-type="4th-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container hidden" data-type="3rd-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container hidden" data-type="2nd-digit">
+                <div class="digit">0</div>
+            </div>
+            <div class="digit-container" data-type="1st-digit">
+                <div class="digit">0</div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="addButton">+</button><br><br>
+            <button id="resetButton">Reset</button>
+            <button id="subButton">-</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () { // Initialize counter from localStorage or set to 0
+            let counter = parseInt(localStorage.getItem('clickerCount')) || 0;
+
+            // Get DOM elements
+            const addButton = document.getElementById('addButton');
+            const subButton = document.getElementById('subButton');
+            const resetButton = document.getElementById('resetButton');
+            const digitContainers = Array.from(document.querySelectorAll('.digit-container[data-type]'));
+            const minusSign = document.getElementById('minusSign');
+
+            // Function to update the display
+            function updateDisplay(number) { // Handle negative numbers
+                const isNegative = number < 0;
+                const absNumber = Math.abs(number);
+
+                // Convert number to string
+                const numStr = absNumber.toString();
+                const digits = numStr.split('');
+
+                // Show/hide minus sign
+                minusSign.classList.toggle('hidden', ! isNegative);
+
+                // Update each digit container
+                digitContainers.forEach((container, index) => {
+                    const digit = container.querySelector('.digit');
+                    const reversedIndex = digitContainers.length - 1 - index;
+                    const digitIndex = digits.length - 1 - reversedIndex;
+
+                    if (digitIndex >= 0) {
+                        digit.textContent = digits[digitIndex];
+                        container.classList.remove('hidden');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Initialize display
+            updateDisplay(counter);
+
+            // Add button click handler
+            addButton.addEventListener('click', () => {
+                if (counter < 9999999) {
+                    counter++;
+                    updateDisplay(counter);
+                    localStorage.setItem('clickerCount', counter);
+                }
+            });
+
+            // Subtract button click handler
+            subButton.addEventListener('click', () => {
+                if (counter > -9999999) {
+                    counter--;
+                    updateDisplay(counter);
+                    localStorage.setItem('clickerCount', counter);
+                }
+            });
+
+            // Reset button click handler
+            resetButton.addEventListener('click', () => {
+                counter = 0;
+                updateDisplay(counter);
+                localStorage.setItem('clickerCount', counter);
+            });
+        });
+    </script>
+</body></html>
